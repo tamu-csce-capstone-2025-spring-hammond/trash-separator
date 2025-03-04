@@ -13,8 +13,8 @@ dataset = torchvision.datasets.ImageFolder(root="dataset", transform=transform)
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
 trainset, testset = torch.utils.data.random_split(dataset, [train_size, test_size])
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
-testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=True)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
+testloader = torch.utils.data.DataLoader(testset, batch_size=64, shuffle=True)
 
 
 # model
@@ -38,17 +38,17 @@ class convnet(nn.Module):
       super(convnet, self).__init__()
 
       # input channels, output channels, conv size, padding, (etc.)
-      self.layer1 = nn.Conv2d(3, 8, 3, padding = 1)
-      self.layer2 = nn.Conv2d(8, 16, 3, padding = 1)
-      self.layer3 = residual_block(16)
-      self.layer4 = nn.Linear(16 * 56 * 56, 10)
+      self.layer1 = nn.Conv2d(3, 16, 3, padding = 1)
+      self.layer2 = nn.Conv2d(16, 32, 3, padding = 1)
+      self.layer3 = residual_block(32)
+      self.layer4 = nn.Linear(32 * 56 * 56, 6)
 
       self.pool = nn.MaxPool2d(2)
       self.relu = nn.ReLU()
       self.softmax = nn.Softmax(dim = 1)
 
-      self.batchnorm1 = nn.BatchNorm2d(8)
-      self.batchnorm2 = nn.BatchNorm2d(16)
+      self.batchnorm1 = nn.BatchNorm2d(16)
+      self.batchnorm2 = nn.BatchNorm2d(32)
 
     def forward(self, x):
       # layer 1
@@ -74,9 +74,10 @@ class convnet(nn.Module):
       return x
     
 # training
+print("training...")
 model = convnet()
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr = 0.0001)
 for epoch in range(10):
   for i, (x, y) in enumerate(trainloader):
     y_pred = model(x)
