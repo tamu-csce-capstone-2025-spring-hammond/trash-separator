@@ -16,17 +16,32 @@ const HomePage = () => {
         }
     };
 
-    // Using uploaded image
-    const handleUpload = (event) => {
+    const handleUpload = async (event) => {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-            navigate('/results', { state: { image: reader.result } });
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+    
+        const formData = new FormData();
+        formData.append("image", file);  // Key must match Flask's `request.files["image"]`
+    
+        try {
+            const response = await fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                body: formData,
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            console.log("Prediction:", data.prediction);
+            navigate("/results", { state: { image: URL.createObjectURL(file), prediction: data.prediction } });
+
+        } catch (error) {
+            console.error("Error sending image:", error);
         }
     };
+
 
     return (
     <div className="app-container">
