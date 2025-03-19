@@ -9,13 +9,42 @@ const HomePage = () => {
     const navigate = useNavigate();
 
     // Using captured picture using webcam
-    const capturePhoto = () => {
+    const capturePhoto = async () => {
         if (webcamRef.current) {
             const imageSrc = webcamRef.current.getScreenshot();
-            navigate('/results', { state: { image: imageSrc } });
+    
+            if (!imageSrc) {
+                console.error("Failed to capture image");
+                return;
+            }
+    
+            // Convert base64 image to a file
+            const blob = await fetch(imageSrc).then(res => res.blob());
+            const file = new File([blob], "captured_image.jpg", { type: "image/jpeg" });
+    
+            const formData = new FormData();
+            formData.append("image", file); // Match Flask's `request.files["image"]`
+    
+            try {
+                const response = await fetch("http://127.0.0.1:5000/predict", {
+                    method: "POST",
+                    body: formData,
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+    
+                const data = await response.json();
+                console.log("Prediction:", data.prediction);
+                navigate("/results", { state: { image: imageSrc, prediction: data.prediction } });
+    
+            } catch (error) {
+                console.error("Error sending captured image:", error);
+            }
         }
     };
-
+    
     const handleUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
