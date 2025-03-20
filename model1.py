@@ -3,11 +3,11 @@ import torchvision
 import torch.nn as nn
 
 # dataset loading
-
+print("loading dataset...")
 transform = torchvision.transforms.Compose([
   torchvision.transforms.ToTensor(),
   torchvision.transforms.Resize((224, 224)),
-  torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+  torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
   ])
 dataset = torchvision.datasets.ImageFolder(root="dataset", transform=transform)
 train_size = int(0.8 * len(dataset))
@@ -40,8 +40,11 @@ class convnet(nn.Module):
       # input channels, output channels, conv size, padding, (etc.)
       self.layer1 = nn.Conv2d(3, 16, 3, padding = 1)
       self.layer2 = nn.Conv2d(16, 32, 3, padding = 1)
-      self.layer3 = residual_block(32)
-      self.layer4 = nn.Linear(32 * 56 * 56, 6)
+      # self.layer3 = residual_block(32)
+      self.layer3 = nn.Conv2d(32, 64, 3, padding = 1)
+      self.layer4 = nn.Conv2d(64, 64, 3, padding = 1)
+      self.layer5 = nn.Conv2d(64, 64, 3, padding = 1)
+      self.layer6 = nn.Linear(64 * 7 * 7, 7)
 
       self.pool = nn.MaxPool2d(2)
       self.relu = nn.ReLU()
@@ -64,24 +67,41 @@ class convnet(nn.Module):
 
       # layer 3
       x = self.layer3(x)
-      x = self.batchnorm2(x)
+      x = self.pool(x)
       x = self.relu(x)
+      # x = self.batchnorm2(x)
+      # x = self.relu(x)
 
       # layer 4
-      x = x.view(x.size(0), -1)
       x = self.layer4(x)
+      x = self.pool(x)
+      x = self.relu(x)
+
+      # layer 5
+      x = self.layer5(x)
+      x = self.pool(x)
+      x = self.relu(x)
+
+      # layer 6
+      x = x.view(x.size(0), -1)
+      x = self.layer6(x)
       x = self.softmax(x)
       return x
     
 # training
 print("training...")
+min_model = convnet()
+min_loss = float('inf')
 model = convnet()
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.0001)
-for epoch in range(10):
+for epoch in range(50):
   for i, (x, y) in enumerate(trainloader):
     y_pred = model(x)
     loss = loss_fn(y_pred, y)
+    if loss < min_loss:
+      min_loss = loss
+      min_model = model
 
     optimizer.zero_grad()
     loss.backward()
@@ -89,13 +109,15 @@ for epoch in range(10):
 
     if i % 100 == 0:
       print(f"epoch: {epoch}, batch: {i}, loss: {loss.item()}")
+print("min_loss:", min_loss)
 
 # testing
+print("testing...")
 correct = 0
 total = 0
 with torch.no_grad():
   for x, y in testloader:
-    y_pred = model(x)
+    y_pred = min_model(x)
     _, predicted = torch.max(y_pred.data, 1)
     total += y.size(0)
     correct += (predicted == y).sum().item()
