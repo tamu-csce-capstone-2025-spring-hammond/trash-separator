@@ -1,13 +1,62 @@
-# C:/Python312/python.exe -m flask --app server/api run
-from flask import Flask
+import os
 import torch
+from torchvision import models, datasets
+import torch.nn as nn
+import torchvision.transforms as transforms
+from flask import Flask, request, jsonify
+from PIL import Image
+from flask_cors import CORS
 
+# Initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
-@app.route("/")
-def hello_world():
-    return "Hello, World!", 200
+# Load model
+MODEL_PATH = "../resnet50_model5.pth"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-@app.route("/model/<imgfile>")
-def model(imgfile):
-    pass
+# Image transformation
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+dataset_path = '../dataset'
+full_dataset = datasets.ImageFolder(root=dataset_path, transform=transform)
+class_names = full_dataset.classes
+
+num_classes = 8
+model = models.resnet50(pretrained=False)
+model.fc = torch.nn.Sequential(
+    torch.nn.Dropout(p=0.2),
+    torch.nn.Linear(model.fc.in_features, num_classes)
+)
+
+# Load model weights
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+model.to(device)
+model.eval()
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+
+    image = request.files["image"]
+
+    try:
+        img = Image.open(image).convert("RGB")
+        img = transform(img).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+            outputs = model(img)
+            _, predicted = torch.max(outputs, 1)
+            class_name = class_names[predicted.item()]
+
+        return jsonify({"prediction": class_name})
+    except Exception as e:
+        return jsonify({"error": f"Failed to process image: {e}"}), 500
+
+if __name__ == "__main__":
+    app.run(debug=True)
