@@ -6,7 +6,7 @@ input_folder = './dataset'
 
 for root, dirs, files in os.walk(input_folder):
     for img_filename in files:
-        if not (img_filename.lower().endswith(".png") or img_filename.lower().endswith(".jpg") or img_filename.lower().endswith(".jpeg")) and not "processed_" in img_filename:
+        if not (img_filename.lower().endswith(".png") or img_filename.lower().endswith(".jpg") or img_filename.lower().endswith(".jpeg")) or "processed_" in img_filename:
             continue  # Skip non-PNG and non-JPG files
 
         img_path = os.path.join(root, img_filename)  # Full path to the image
