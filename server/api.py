@@ -6,16 +6,16 @@ import torchvision.transforms as transforms
 from flask import Flask, request, jsonify
 from PIL import Image
 from flask_cors import CORS
-
+import numpy as np
+import cv2
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
 # Load model
-MODEL_PATH = "../resnet50_model5.pth"
+MODEL_PATH = "../vit_model.pth"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Image transformation
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -26,17 +26,16 @@ dataset_path = '../dataset'
 full_dataset = datasets.ImageFolder(root=dataset_path, transform=transform)
 class_names = full_dataset.classes
 
-num_classes = 8
-model = models.resnet50(pretrained=False)
-model.fc = torch.nn.Sequential(
-    torch.nn.Dropout(p=0.2),
-    torch.nn.Linear(model.fc.in_features, num_classes)
-)
+num_classes = 9
+model = models.vit_b_16()
+# model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+# model.heads.head = torch.nn.Linear(model.heads.head.in_features, num_classes)
+model.heads[0] = torch.nn.Linear(model.heads[0].in_features, num_classes)
 
-# Load model weights
-model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+
+model.load_state_dict(torch.load("../vit_model.pth", map_location=device))
 model.to(device)
-model.eval()
+model.eval() 
 
 @app.route("/predict", methods=["POST"])
 def predict():
