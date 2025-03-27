@@ -8,6 +8,8 @@ from PIL import Image
 from flask_cors import CORS
 import numpy as np
 import cv2
+from rembg import remove  # Import rembg
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
@@ -45,9 +47,11 @@ def predict():
     image = request.files["image"]
 
     try:
-        img = Image.open(image).convert("RGB")
+        img = Image.open(image).convert("RGBA")
+        img = remove(img)
+        img = img.convert("RGB")
         img = transform(img).unsqueeze(0).to(device)
-
+        # remove background of image
         with torch.no_grad():
             outputs = model(img)
             _, predicted = torch.max(outputs, 1)
