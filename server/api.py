@@ -12,6 +12,20 @@ import cv2
 app = Flask(__name__)
 CORS(app)
 
+binary_mode = 0
+
+look_up = {
+    'battery' : 'trash',
+    'cardboard' : 'recycling',
+    'compost' : 'trash',
+    'glass' : 'recycling',
+    'metal' : 'recycling',
+    'paper' : 'recycling',
+    'plastic' : 'recycling',
+    'syringe' : 'trash',
+    'trash' : 'trash'
+}
+
 # Load model
 MODEL_PATH = "../vit_model.pth"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -51,11 +65,18 @@ def predict():
         with torch.no_grad():
             outputs = model(img)
             _, predicted = torch.max(outputs, 1)
-            class_name = class_names[predicted.item()]
+            class_name = look_up[class_names[predicted.item()]]
 
         return jsonify({"prediction": class_name})
     except Exception as e:
         return jsonify({"error": f"Failed to process image: {e}"}), 500
+
+@app.route('/change-policy/<category>/<bin>', methods=["POST"])
+def change_policy(category, bin):
+    # Process the policy change logic here
+    look_up[category] = bin
+    return jsonify({"message": f"Policy for {category} changed to {bin}"}), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)
