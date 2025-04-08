@@ -24,9 +24,7 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-dataset_path = '../dataset'
-full_dataset = datasets.ImageFolder(root=dataset_path, transform=transform)
-class_names = full_dataset.classes
+class_names = ["battery", "cardboard", "compost", "glass", "metal", "paper", "plastic", "syringe", "trash"]
 
 num_classes = 9
 model = models.vit_b_16()
@@ -61,7 +59,7 @@ def predict():
     except Exception as e:
         return jsonify({"error": f"Failed to process image: {e}"}), 500
 
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5000)
-def handler(request):
-    return app(request)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5050)
+# def handler(request):
+#     return app(request)
