@@ -59,7 +59,7 @@ def predict():
     except Exception as e:
         return jsonify({"error": f"Failed to process image: {e}"}), 500
 
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5050)
-def handler(request):
-    return app(request)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+# def handler(request):
+#     return app(request)
