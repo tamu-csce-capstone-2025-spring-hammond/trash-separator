@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import './HomePage.css';
+import heic2any from "heic2any";
 
 const HomePage = () => {
     const [showWebcam, setShowWebcam] = useState(false);
@@ -26,7 +27,7 @@ const HomePage = () => {
             formData.append("image", file); // Match Flask's `request.files["image"]`
     
             try {
-                const response = await fetch("http://127.0.0.1:5000/predict", {
+                const response = await fetch("http://127.0.0.1:5050/predict", {
                     method: "POST",
                     body: formData,
                 });
@@ -45,32 +46,57 @@ const HomePage = () => {
         }
     };
     
-    const handleUpload = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-    
-        const formData = new FormData();
-        formData.append("image", file);  // Key must match Flask's `request.files["image"]`
-    
+
+
+const handleUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    let convertedFile = file;
+
+    // Check if the file is HEIC and convert it
+    if (file.type === "image/heic" || file.name.endsWith(".heic")) {
         try {
-            const response = await fetch("http://127.0.0.1:5000/predict", {
-                method: "POST",
-                body: formData,
+            const blob = await heic2any({
+                blob: file,
+                toType: "image/jpeg", // Convert to JPEG
             });
-    
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
-            }
-    
-            const data = await response.json();
-            console.log("Prediction:", data.prediction);
-            navigate("/results", { state: { image: URL.createObjectURL(file), prediction: data.prediction } });
 
+            convertedFile = new File([blob], file.name.replace(/\.heic$/, ".jpg"), {
+                type: "image/jpeg",
+            });
         } catch (error) {
-            console.error("Error sending image:", error);
+            console.error("Error converting HEIC file:", error);
+            return;
         }
-    };
+    }
 
+    const formData = new FormData();
+    formData.append("image", convertedFile); // Key must match Flask's `request.files["image"]`
+
+    try {
+        const response = await fetch("http://127.0.0.1:5050/predict", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Prediction:", data.prediction);
+        navigate("/results", {
+            state: { 
+                image: URL.createObjectURL(convertedFile), 
+                prediction: data.prediction 
+            }
+        });
+
+    } catch (error) {
+        console.error("Error sending image:", error);
+    }
+};
 
     return (
     <div className="app-container">
