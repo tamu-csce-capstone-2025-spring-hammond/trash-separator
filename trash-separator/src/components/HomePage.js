@@ -6,6 +6,7 @@ import heic2any from "heic2any";
 
 const HomePage = () => {
     const [showWebcam, setShowWebcam] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const webcamRef = useRef(null);
     const navigate = useNavigate();
 
@@ -27,6 +28,7 @@ const HomePage = () => {
             formData.append("image", file); // Match Flask's `request.files["image"]`
     
             try {
+                setIsLoading(true);
                 const response = await fetch("http://127.0.0.1:5050/predict", {
                     method: "POST",
                     body: formData,
@@ -39,6 +41,7 @@ const HomePage = () => {
                 const data = await response.json();
                 console.log("Prediction:", data.prediction);
                 navigate("/results", { state: { image: imageSrc, prediction: data.prediction } });
+                setIsLoading(false);
     
             } catch (error) {
                 console.error("Error sending captured image:", error);
@@ -75,6 +78,7 @@ const handleUpload = async (event) => {
     formData.append("image", convertedFile); // Key must match Flask's `request.files["image"]`
 
     try {
+        setIsLoading(true);
         const response = await fetch("http://127.0.0.1:5050/predict", {
             method: "POST",
             body: formData,
@@ -92,6 +96,7 @@ const handleUpload = async (event) => {
                 prediction: data.prediction 
             }
         });
+        setIsLoading(false);
 
     } catch (error) {
         console.error("Error sending image:", error);
@@ -100,6 +105,18 @@ const handleUpload = async (event) => {
 
     return (
     <div className="app-container">
+        {isLoading && (
+        <div className="loading-overlay">
+            <div className="loading-content">
+            <img 
+            src="/assets/loading.gif" 
+            alt="Loading..." 
+            style={{ width: '100px', height: 'auto', marginBottom: '10px' }}
+            />
+            <p>Analyzing image...</p>
+            </div>
+        </div>
+        )}
         <main className="button-container">
         <button className="main-button" onClick={() => setShowWebcam(!showWebcam)}>
             {showWebcam ? 'Close Camera' : 'Scan Using Camera'}
