@@ -58,6 +58,27 @@ def predict():
         return jsonify({"prediction": class_name})
     except Exception as e:
         return jsonify({"error": f"Failed to process image: {e}"}), 500
+    
+@app.route("/blurry", methods=["POST"])
+def blurry():
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+    
+    image = request.files["image"]
+
+    try:
+        img = cv2.imdecode(np.frombuffer(image.read(), np.uint8), cv2.IMREAD_COLOR)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        fm = cv2.Laplacian(gray, cv2.CV_64F).var()
+        threshold = 600
+
+        if fm > threshold:
+            return jsonify({"blurry": False, "focus_measure": fm}), 200
+        else:
+            return jsonify({"blurry": True, "focus_measure": fm}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to process image: {e}"}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

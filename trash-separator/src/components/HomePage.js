@@ -27,6 +27,26 @@ const HomePage = () => {
             formData.append("image", file); // Match Flask's `request.files["image"]`
     
             try {
+                const response = await fetch("http://127.0.0.1:5000/blurry", {
+                    method: "POST",
+                    body: formData,
+                });
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("Blurry Prediction:", data.blurry, "level:", data.focus_measure);
+                if (data.blurry) {
+                    alert("Image is blurry, please try again");
+                    return;
+                }
+            }
+            catch (error) {
+                console.error("Error sending captured image:", error);
+            }
+    
+            try {
                 const response = await fetch("http://127.0.0.1:5050/predict", {
                     method: "POST",
                     body: formData,
@@ -73,6 +93,26 @@ const handleUpload = async (event) => {
 
     const formData = new FormData();
     formData.append("image", convertedFile); // Key must match Flask's `request.files["image"]`
+
+    try {
+        const response = await fetch("http://127.0.0.1:5000/blurry", {
+            method: "POST",
+            body: formData,
+        });
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status} - ${response.error}`);
+        }
+
+        const data = await response.json();
+        console.log("Blurry Prediction:", data.blurry, "level:", data.focus_measure);
+        if (data.blurry) {
+            alert("Image is blurry, please try again");
+            return;
+        }
+    }
+    catch (error) {
+        console.error("Error sending captured image:", error);
+    }
 
     try {
         const response = await fetch("http://127.0.0.1:5000/predict", {
