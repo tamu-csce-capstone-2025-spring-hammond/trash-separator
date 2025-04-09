@@ -12,7 +12,7 @@ from rembg import remove  # Import rembg
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://main.d1yehgy0hyfcp0.amplifyapp.com", "https://trashseparator.xyz"])
 
 # Load model
 MODEL_PATH = "../vit_model.pth"
@@ -60,6 +60,6 @@ def predict():
         return jsonify({"error": f"Failed to process image: {e}"}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5050)
+    app.run(host="0.0.0.0", port=5000)
 # def handler(request):
 #     return app(request)
