@@ -29,10 +29,15 @@ const HomePage = () => {
     
             try {
                 setIsLoading(true);
-                const response = await fetch("https://trashseparator.xyz/predict", {
-                    method: "POST",
-                    body: formData,
-                });
+                // const response = await fetch("https://trashseparator.xyz/predict", {
+                //     method: "POST",
+                //     body: formData,
+                // });
+
+                const response = await fetch("http://127.0.0.1:5000/predict", {
+                        method: "POST",
+                         body: formData,
+                     });
     
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status}`);
@@ -79,10 +84,14 @@ const handleUpload = async (event) => {
 
     try {
         setIsLoading(true);
-        const response = await fetch("https://trashseparator.xyz/predict", {
+        // const response = await fetch("https://trashseparator.xyz/predict", {
+        //     method: "POST",
+        //     body: formData,
+        // });
+        const response = await fetch("http://127.0.0.1:5000/predict", {
             method: "POST",
-            body: formData,
-        });
+             body: formData,
+         });
 
         if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
