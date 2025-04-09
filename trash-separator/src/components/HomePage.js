@@ -27,7 +27,7 @@ const HomePage = () => {
             formData.append("image", file); // Match Flask's `request.files["image"]`
     
             try {
-                const response = await fetch("http://127.0.0.1:5000/predict", {
+                const response = await fetch("http://54.226.213.122:5000/predict", {
                     method: "POST",
                     body: formData,
                 });
@@ -75,7 +75,7 @@ const handleUpload = async (event) => {
     formData.append("image", convertedFile); // Key must match Flask's `request.files["image"]`
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/predict", {
+        const response = await fetch("http://54.226.213.122:5000/predict", {
             method: "POST",
             body: formData,
         });
