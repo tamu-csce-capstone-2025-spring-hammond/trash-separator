@@ -12,7 +12,7 @@ from rembg import remove  # Import rembg
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://main.d1yehgy0hyfcp0.amplifyapp.com", "https://trashseparator.xyz"])
 
 # Load model
 MODEL_PATH = "../vit_model.pth"
