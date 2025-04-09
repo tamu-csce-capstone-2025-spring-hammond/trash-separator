@@ -27,7 +27,7 @@ const HomePage = () => {
             formData.append("image", file); // Match Flask's `request.files["image"]`
     
             try {
-                const response = await fetch("http://127.0.0.1:5000/predict", {
+                const response = await fetch("http://127.0.0.1:5050/predict", {
                     method: "POST",
                     body: formData,
                 });
