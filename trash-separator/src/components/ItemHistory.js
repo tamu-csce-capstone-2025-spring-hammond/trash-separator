@@ -10,8 +10,14 @@ const ItemHistory = () => {
       <h1>Item History</h1>
       <p>This page will display past waste classifications.</p>
 
-      <button className="back-button" onClick={() => navigate('/')}>Back to Home</button>
-    </div>
+      <button
+        style={{ backgroundColor: '#1B4965', color: 'white', border: 'none' }}
+        className="btn mt-4"
+        onClick={() => navigate("/")}
+        >
+        Back to Home
+      </button>
+</div>
   );
 }
 

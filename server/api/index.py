@@ -13,6 +13,7 @@ import difflib
 from doctr.models import ocr_predictor
 from doctr.io import DocumentFile
 import tempfile
+
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -41,6 +42,7 @@ def classify_image_vit(image_path):
     image = Image.open(image_path).convert('RGB')
     image = transform(image)
     image = image.unsqueeze(0).to(device)
+    model_vit.to(device)
     model_vit.eval()
     with torch.no_grad():
         outputs = model_vit(image)
@@ -49,11 +51,14 @@ def classify_image_vit(image_path):
         class_idx = predicted.item()
         class_name = class_names_vit[class_idx]
     probs = probs.squeeze(0)
-    scores = {class_names_vit[i]: round(probs[i].item(), 4) for i in range(len(class_names_vit))}
+    scores = {}
+    for i in range(len(class_names_vit)):
+        scores[class_names_vit[i]] = round(probs[i].item(), 4)
     return scores, class_name
 
 # --- OCR Function ---
 def ocr_scan(image_path):
+    logs = []
     look_up = {
         'battery': ['battery'],
         'aa': ['battery'],
@@ -79,7 +84,7 @@ def ocr_scan(image_path):
     ocr_model = ocr_predictor(det_arch='db_resnet50', reco_arch='crnn_vgg16_bn', pretrained=True).to(device)
 
     for i, img in enumerate(rotations):
-        print(f"\n--- Rotation: {i * 90}° ---")
+        logs.append(f"\n--- Rotation: {i * 90}° ---")
         with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
             temp_file_path = temp_file.name
             img.save(temp_file_path)
@@ -100,25 +105,26 @@ def ocr_scan(image_path):
             for key, val in look_up.items():
                 ratio = difflib.SequenceMatcher(None, word, key).ratio()
                 if ratio > 0.7:
-                    print(f'scanned word: {word} | look up word: {key} | likely classes: {val} | confidence score: {ratio:.2f}')
+                    logs.append(f'scanned word: {word} | look up word: {key} | likely classes: {val} | confidence score: {ratio:.2f}')
                     for v in val:
                         scanned_classes.add(v)
 
         os.remove(temp_file_path)
 
-    return list(scanned_classes)
+    return list(scanned_classes), logs
 
 
 # --- Final Combined Classifier ---
 def vit_with_ocr(image_path):
     OCR_BONUS = 0.5
     scores, class_name = classify_image_vit(image_path)
-    ocr_scanned_classes = ocr_scan(image_path)
+    before_ocr = scores
+    ocr_scanned_classes, logs = ocr_scan(image_path)
     for ocr_class in ocr_scanned_classes:
         if ocr_class in scores:
             scores[ocr_class] += OCR_BONUS
     class_name = max(scores, key=scores.get)
-    return scores, class_name
+    return scores, class_name, logs, before_ocr
 
 # --- Flask Endpoint ---
 @app.route("/predict", methods=["POST"])
@@ -139,12 +145,14 @@ def predict():
             img.save(temp_path)
 
         # Run model + OCR
-        scores, class_name = vit_with_ocr(temp_path)
+        scores, class_name, logs, before_ocr = vit_with_ocr(temp_path)
         os.remove(temp_path)
 
         return jsonify({
             "prediction": class_name,
-            "scores": scores
+            "non_ocr": before_ocr,
+            "scores": scores,
+            "details": logs
         })
 
     except Exception as e:
