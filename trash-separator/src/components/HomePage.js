@@ -29,10 +29,15 @@ const HomePage = () => {
     
             try {
                 setIsLoading(true);
-                const response = await fetch("https://trashseparator.xyz/predict", {
-                    method: "POST",
-                    body: formData,
-                });
+                // const response = await fetch("https://trashseparator.xyz/predict", {
+                //     method: "POST",
+                //     body: formData,
+                // });
+
+                const response = await fetch("http://127.0.0.1:5000/predict", {
+                        method: "POST",
+                         body: formData,
+                     });
     
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status}`);
@@ -40,7 +45,17 @@ const HomePage = () => {
     
                 const data = await response.json();
                 console.log("Prediction:", data.prediction);
-                navigate("/results", { state: { image: imageSrc, prediction: data.prediction } });
+                navigate("/results", {
+                    state: {
+                        image: imageSrc,
+                        prediction: data.prediction,
+                        non_ocr: data.non_ocr,
+                        scores: data.scores,
+                        details: data.details,
+                        status: data.status
+                    }
+                });
+
                 setIsLoading(false);
     
             } catch (error) {
@@ -79,10 +94,14 @@ const handleUpload = async (event) => {
 
     try {
         setIsLoading(true);
-        const response = await fetch("https://trashseparator.xyz/predict", {
+        // const response = await fetch("https://trashseparator.xyz/predict", {
+        //     method: "POST",
+        //     body: formData,
+        // });
+        const response = await fetch("http://127.0.0.1:5000/predict", {
             method: "POST",
-            body: formData,
-        });
+             body: formData,
+         });
 
         if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
@@ -93,7 +112,11 @@ const handleUpload = async (event) => {
         navigate("/results", {
             state: { 
                 image: URL.createObjectURL(convertedFile), 
-                prediction: data.prediction 
+                prediction: data.prediction,
+                non_ocr: data.non_ocr,
+                scores: data.scores, 
+                details: data.details,
+                status: data.status
             }
         });
         setIsLoading(false);

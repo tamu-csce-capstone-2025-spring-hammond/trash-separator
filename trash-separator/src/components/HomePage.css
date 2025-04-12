@@ -24,7 +24,7 @@
   }
   
   .main-button {
-    background-color: #48a54b;
+    background-color: #2C6E49;
     color: white;
     border: none;
     padding: 15px 30px;
@@ -35,7 +35,7 @@
   }
   
   .main-button:hover {
-    background-color: #53cd57;
+    background-color: #467f5d;
   }
 
   .webcam-container {
@@ -49,12 +49,12 @@
     width: 320px;
     height: 240px;
     border-radius: 8px;
-    border: 2px solid #48a54b;
+    border: 2px solid #2C6E49;
   }
   
   .capture-button {
     margin-top: 10px;
-    background-color: #ff9800;
+    background-color: #8B2635;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -64,7 +64,7 @@
   }
   
   .capture-button:hover {
-    background-color: #e68900;
+    background-color: #8f444f;
   }
   
   .captured-image-container {
@@ -76,7 +76,7 @@
     width: 320px;
     height: 240px;
     border-radius: 8px;
-    border: 2px solid #4CAF50;
+    border: 2px solid #2C6E49;
   }
   
   .loading-overlay {
