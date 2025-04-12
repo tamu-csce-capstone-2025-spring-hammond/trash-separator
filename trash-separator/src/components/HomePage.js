@@ -5,7 +5,6 @@ import './HomePage.css';
 import heic2any from "heic2any";
 
 const HomePage = () => {
-    console.log("🏠 HomePage rendered");
     const [showWebcam, setShowWebcam] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showIntroPopup, setShowIntroPopup] = useState(true);
@@ -109,28 +108,28 @@ const handleUpload = async (event) => {
     return (
         <>
         {showIntroPopup && (
-  <div className="intro-popup-overlay">
-    <div className="intro-popup-content">
-      <img
-        src="/images/robot-smile.png"
-        alt="Robot"
-        className="intro-robot-img"
-      />
-     <ol className="intro-text">
-  <li>Make sure to scan items one at a time</li>
-  <li>Try for good lighting and a clear background</li>
-</ol>
+        <div className="intro-popup-overlay">
+            <div className="intro-popup-content">
+            <img
+                src="/images/robot-smile.png"
+                alt="Robot"
+                className="intro-robot-img"
+            />
+            <ol className="intro-text">
+                <li>Make sure to scan items one at a time</li>
+                <li>Try for good lighting and a clear background</li>
+            </ol>
 
-      <button 
-        onClick={() => setShowIntroPopup(false)} 
-        className="intro-close-button"
-        style={{ backgroundImage: "url('/images/button-2.png')" }}
-      >
-        Got it!
-      </button>
-    </div>
-  </div>
-)}
+            <button 
+                onClick={() => setShowIntroPopup(false)} 
+                className="intro-close-button"
+                style={{ backgroundImage: "url('/images/button-2.png')" }}
+            >
+                Got it!
+            </button>
+            </div>
+        </div>
+        )}
 
     <div className="app-container">
         {isLoading && (
