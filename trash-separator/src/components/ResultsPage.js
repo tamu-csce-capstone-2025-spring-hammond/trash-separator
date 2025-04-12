@@ -8,26 +8,38 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 const ResultsPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { image, prediction, scores, details, non_ocr } = location.state || {};
+    const { image, prediction, non_ocr, scores, details, status } = location.state || {};
 
     const [result, setResult] = useState(null);
     const [scoreData, setScoreData] = useState({});
     const [beforeOCRScores, setBeforeOCRScores] = useState({});
     const [logs, setLogs] = useState([]);
+    const [predictionStatus, setPredictionStatus] = useState("");
 
     useEffect(() => {
         if (prediction) setResult(prediction);
+        if (non_ocr) setBeforeOCRScores(non_ocr);
         if (scores) setScoreData(scores);
         if (details) setLogs(details);
-        if (non_ocr) setBeforeOCRScores(non_ocr);
-    }, [prediction, scores, details, non_ocr]);
+        if (status) setPredictionStatus(status);
+    }, [prediction, non_ocr, scores, details, status]);
+    
 
 
     return (
         <div className="results-container">
             <h1>Results</h1>
             {image ? <img src={image} alt="Captured" className="captured-image" /> : <p>No image captured.</p>}
-            <h2 className="result-text">{result ? `Prediction: ${result}` : "Processing..."}</h2>
+
+            {result && (
+                <h2 className="mt-2">
+                    <span style={{ color: predictionStatus === "recyclable" ? "green" : predictionStatus === "hazardous" ? "red" : predictionStatus === "compost" ? "brown" : "gray" }}>
+                        {predictionStatus}
+                    </span>
+                </h2>
+            )}
+
+            <h4 className="result-text">{result ? `Prediction: ${result}` : "Processing..."}</h4>
 
             <button
             style={{ backgroundColor: '#1B4965', color: 'white', border: 'none' }}
@@ -49,14 +61,13 @@ const ResultsPage = () => {
                                 data-bs-toggle="collapse"
                                 data-bs-target="#collapseOne"
                                 aria-expanded="true"
-                                aria-controls="collapseOne"
-                            >
+                                aria-controls="collapseOne">
                                 Prediction Details
                             </button>
                         </h2>
                         <div
                             id="collapseOne"
-                            className="accordion-collapse collapse show"
+                            className="accordion-collapse collapse"
                             aria-labelledby="headingOne"
                             data-bs-parent="#predictionDetailsAccordion"
                         >

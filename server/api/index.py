@@ -9,13 +9,60 @@ from flask_cors import CORS
 import numpy as np
 import cv2
 from rembg import remove  # Import rembg
-import difflib
 from doctr.models import ocr_predictor
 from doctr.io import DocumentFile
 import tempfile
+from dotenv import load_dotenv
+import zip_codes
+import Levenshtein
 
+load_dotenv()
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def get_api_output(user_zipcode):
+    print("API triggered")
+    output = set()
+    # CHANGE THIS
+    postal_code = user_zipcode
+    country_code = "US"
+
+    # latitude & longitude for postal code
+    postal_data = zip_codes.get_postal_data(country_code, postal_code)
+
+    latitude = postal_data.get('latitude')
+    longitude = postal_data.get('longitude')
+    if not latitude or not longitude:
+        # return post error
+        print("Could not retrieve latitude/longitude.")
+        return output
+
+    # recycling programs
+    programs = zip_codes.search_recycling_programs(latitude, longitude)
+    if programs:
+        for prog in programs:
+            id = prog.get('program_id', 'N/A')
+            if id != 'N/A':
+                details = zip_codes.get_program_details(id)
+                program_info = details.get(id)
+
+                if program_info:
+                    materials = program_info.get('materials', [])
+                    if materials:
+                        for m in materials:
+                            output.add(zip_codes.code_to_class[str(m['material_id'])])
+                    else:
+                        print("No materials listed for this program.")
+                else:
+                    print("No program details found.")
+        print(output)
+        return output
+
+    else:
+        print("No residential recycling programs found.")
+
+DEFAULT_ZIP = '77407'
+recyclable_classes = get_api_output(DEFAULT_ZIP) or set()
 
 # Flask app
 app = Flask(__name__)
@@ -36,6 +83,34 @@ model_vit.heads[0] = torch.nn.Linear(model_vit.heads[0].in_features, len(class_n
 model_vit.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model_vit.to(device)
 model_vit.eval()
+
+def are_strings_similar(s1, s2, threshold=0.7):
+    """
+    Returns True if the similarity ratio between two strings is >= threshold (default 0.7).
+    Shorter strings still require higher accuracy inherently.
+    """
+    s1 = s1.lower().strip()
+    s2 = s2.lower().strip()
+
+    if not s1 or not s2:
+        return False
+
+    similarity = Levenshtein.ratio(s1, s2)
+    avg_len = (len(s1) + len(s2)) / 2
+
+    # Dynamic threshold:
+    # If avg_len <= 4 → need 90%+
+    # If avg_len >= 20 → allow 65%+
+    # Linearly interpolate between those points
+    if avg_len <= 4:
+        threshold = 0.9
+    elif avg_len >= 20:
+        threshold = 0.65
+    else:
+        # Interpolate between 0.9 and 0.65
+        threshold = 0.9 - ((avg_len - 4) * (0.25 / 16))
+
+    return similarity, threshold
 
 # --- Classification Function ---
 def classify_image_vit(image_path):
@@ -69,13 +144,21 @@ def ocr_scan(image_path):
         'dr pepper': ['metal', 'plastic', 'glass'],
         'sprite': ['metal', 'plastic', 'glass'],
         'pepsi': ['metal', 'plastic', 'glass'],
+        '7up': ['metal', 'plastic', 'glass'],
+        'sunkist': ['metal', 'plastic', 'glass'],
+        'mountain dew': ['metal', 'plastic', 'glass'],
+        'a&w': ['metal', 'plastic', 'glass'],
+        'canada dry': ['metal', 'plastic', 'glass'],
+        'sierra mist': ['metal', 'plastic', 'glass'],
         'coca cola': ['metal', 'plastic', 'glass'],
         'fanta': ['metal', 'plastic', 'glass'],
         'coke': ['metal', 'plastic', 'glass'],
         'campbell': ['metal'],
         'soup': ['metal', 'plastic', 'glass'],
         'ml': ['metal', 'plastic', 'glass'],
-        'soda': ['metal', 'plastic', 'glass']
+        'soda': ['metal', 'plastic', 'glass'],
+        'tropicana': ['plastic', 'cardboard'],
+        'redbull': ['metal']
     }
 
     scanned_classes = set()
@@ -103,9 +186,9 @@ def ocr_scan(image_path):
 
         for word in temp_scanned:
             for key, val in look_up.items():
-                ratio = difflib.SequenceMatcher(None, word, key).ratio()
-                if ratio > 0.7:
-                    logs.append(f'scanned word: {word} | look up word: {key} | likely classes: {val} | confidence score: {ratio:.2f}')
+                similarity, threshold = are_strings_similar(word, key)
+                if similarity >= threshold:
+                    logs.append(f'scanned word: {word} | look up word: {key} | likely classes: {val} | similarity score: {similarity:.2f} | threshold: {threshold:.2f}')
                     for v in val:
                         scanned_classes.add(v)
 
@@ -118,12 +201,18 @@ def ocr_scan(image_path):
 def vit_with_ocr(image_path):
     OCR_BONUS = 0.5
     scores, class_name = classify_image_vit(image_path)
-    before_ocr = scores
-    ocr_scanned_classes, logs = ocr_scan(image_path)
-    for ocr_class in ocr_scanned_classes:
-        if ocr_class in scores:
-            scores[ocr_class] += OCR_BONUS
-    class_name = max(scores, key=scores.get)
+    before_ocr = scores.copy()
+    logs = []
+
+    # if vit is not confident
+    if scores[class_name] < 0.85:
+        ocr_scanned_classes, logs = ocr_scan(image_path)
+        for ocr_class in ocr_scanned_classes:
+            if ocr_class in scores:
+                scores[ocr_class] += OCR_BONUS
+        class_name = max(scores, key=scores.get)
+    else:
+        logs.append("No OCR")
     return scores, class_name, logs, before_ocr
 
 # --- Flask Endpoint ---
@@ -147,12 +236,23 @@ def predict():
         # Run model + OCR
         scores, class_name, logs, before_ocr = vit_with_ocr(temp_path)
         os.remove(temp_path)
+        
+
+        if class_name in ["battery", "syringe"]:
+            status = "hazardous"
+        elif class_name in ["trash", "compost"]:
+            status = class_name
+        elif class_name in recyclable_classes:
+            status = "recyclable"
+        else:
+            status = "trash"
 
         return jsonify({
             "prediction": class_name,
             "non_ocr": before_ocr,
             "scores": scores,
-            "details": logs
+            "details": logs,
+            "status": status
         })
 
     except Exception as e:

@@ -45,7 +45,17 @@ const HomePage = () => {
     
                 const data = await response.json();
                 console.log("Prediction:", data.prediction);
-                navigate("/results", { state: { image: imageSrc, prediction: data.prediction } });
+                navigate("/results", {
+                    state: {
+                        image: imageSrc,
+                        prediction: data.prediction,
+                        non_ocr: data.non_ocr,
+                        scores: data.scores,
+                        details: data.details,
+                        status: data.status
+                    }
+                });
+
                 setIsLoading(false);
     
             } catch (error) {
@@ -105,7 +115,8 @@ const handleUpload = async (event) => {
                 prediction: data.prediction,
                 non_ocr: data.non_ocr,
                 scores: data.scores, 
-                details: data.details
+                details: data.details,
+                status: data.status
             }
         });
         setIsLoading(false);
