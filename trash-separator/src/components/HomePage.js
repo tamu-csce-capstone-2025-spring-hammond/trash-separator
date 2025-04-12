@@ -124,6 +124,7 @@ const handleUpload = async (event) => {
       <button 
         onClick={() => setShowIntroPopup(false)} 
         className="intro-close-button"
+        style={{ backgroundImage: "url('/images/button-2.png')" }}
       >
         Got it!
       </button>
@@ -145,23 +146,29 @@ const handleUpload = async (event) => {
         </div>
         )}
         <main className="button-container">
-        <button className="main-button" onClick={() => setShowWebcam(!showWebcam)}>
+        <button className="main-button hide-on-mobile" onClick={() => setShowWebcam(!showWebcam)} style={{ backgroundImage: "url('/images/button-1.png')" }}>
             {showWebcam ? 'Close Camera' : 'Scan Using Camera'}
         </button>
-        <input type="file" id="upload-input" accept="image/*" onChange={handleUpload} style={{ display: 'none' }} />
-        <button className="main-button" onClick={() => document.getElementById('upload-input').click()}>
+        <input type="file" id="upload-input" accept="image/*" onChange={handleUpload} style={{ display: 'none'}} />
+        <button className="main-button" onClick={() => document.getElementById('upload-input').click()} style={{ backgroundImage: "url('/images/button-1.png')" }}>
           Upload Image
         </button>
-        <button className="main-button" onClick={() => navigate('/history')}>
+        <button className="main-button" onClick={() => navigate('/history')} style={{ backgroundImage: "url('/images/button-1.png')" }}>
           Item History
         </button>
         </main>
 
         {showWebcam && (
-            <div className="webcam-container">
-                <Webcam ref={webcamRef} className="webcam" screenshotFormat="image/png" />
-                <button className="capture-button" onClick={capturePhoto}>Capture Photo</button>
-            </div>
+        <div className="webcam-container">
+            <Webcam ref={webcamRef} className="webcam" screenshotFormat="image/png" />
+            <button
+            className="capture-button"
+            onClick={capturePhoto}
+            style={{ backgroundImage: "url('/images/button-2.png')" }}
+            >
+            Capture Photo
+            </button>
+        </div>
         )}
 
     </div>

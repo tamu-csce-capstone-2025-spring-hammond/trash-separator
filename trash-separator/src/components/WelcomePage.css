@@ -121,14 +121,14 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 18pt; /* Adjust the text size */
-  color: white; /* Text color, you can adjust it as needed */
-  pointer-events: none; /* Prevents text from interfering with button click */
+  font-size: 18pt;
+  color: white; 
+  pointer-events: none;
 }
 
 
 .submit-button-welcome:hover .submit-button-img {
-  opacity: 0.8;  /* Slight opacity change on hover */
+  opacity: 0.8;
 }
 
 

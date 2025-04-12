@@ -10,7 +10,7 @@ const ItemHistory = () => {
       <h1>Item History</h1>
       <p>This page will display past waste classifications.</p>
 
-      <button className="back-button" onClick={() => navigate('/')}>Back to Home</button>
+      <button className="back-button" onClick={() => navigate('/homepage')}>Back to Home</button>
     </div>
   );
 }

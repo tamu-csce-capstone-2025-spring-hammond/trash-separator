@@ -21,15 +21,13 @@ const WelcomePage = () => {
   const handleSubmit = () => {
     console.log('Zip code submitted:', zipCode);
     console.log('Navigating to homepage...');
-    setShowPopup(false); // Close popup to avoid extra UI flash
+    setShowPopup(false);
 
-    // Prevent any more updates
     setIsSubmitting(true);
 
-    // Set timeout to allow popup to disappear before navigating
     setTimeout(() => {
       navigate('/homepage');
-    }, 0); // Immediate navigation (no delay)
+    }, 0);
   };
 
   
@@ -79,7 +77,7 @@ const WelcomePage = () => {
       />
       <button onClick={handleSubmit} className="submit-button-welcome">
         <img src="/images/button-2.png" alt="Submit" className="submit-button-img" />
-        <span className="submit-text">Submit</span> {/* Text placed over the image */}
+        <span className="submit-text">Submit</span>
       </button>
     </div>
   </div>
