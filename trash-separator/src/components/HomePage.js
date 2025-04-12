@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import './HomePage.css';
@@ -8,48 +8,51 @@ const HomePage = () => {
     const [showWebcam, setShowWebcam] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showIntroPopup, setShowIntroPopup] = useState(true);
+    const [capturedImage, setCapturedImage] = useState(null);
 
     const webcamRef = useRef(null);
     const navigate = useNavigate();
 
+    
     // Using captured picture using webcam
     const capturePhoto = async () => {
         if (webcamRef.current) {
             const imageSrc = webcamRef.current.getScreenshot();
-    
             if (!imageSrc) {
                 console.error("Failed to capture image");
                 return;
             }
     
-            // Convert base64 image to a file
+            setCapturedImage(imageSrc); // Freeze by storing image
+            setShowWebcam(false); // Hide webcam
+    
+            // Convert base64 to file for upload
             const blob = await fetch(imageSrc).then(res => res.blob());
             const file = new File([blob], "captured_image.jpg", { type: "image/jpeg" });
     
             const formData = new FormData();
-            formData.append("image", file); // Match Flask's `request.files["image"]`
+            formData.append("image", file);
     
             try {
                 setIsLoading(true);
-                const response = await fetch("https://trashseparator.xyz/predict", {
+                const response = await fetch("http://127.0.0.1:5001/predict", {
                     method: "POST",
                     body: formData,
                 });
     
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Server error: ${response.status}`);
     
                 const data = await response.json();
                 console.log("Prediction:", data.prediction);
                 navigate("/results", { state: { image: imageSrc, prediction: data.prediction } });
-                setIsLoading(false);
-    
             } catch (error) {
                 console.error("Error sending captured image:", error);
+            } finally {
+                setIsLoading(false);
             }
         }
     };
+    
     
 
 
@@ -158,19 +161,26 @@ const handleUpload = async (event) => {
         </main>
 
         {showWebcam && (
-        <div className="webcam-container">
-            <Webcam ref={webcamRef} className="webcam" screenshotFormat="image/png" />
-            <button
-            className="capture-button"
-            onClick={capturePhoto}
-            style={{ backgroundImage: "url('/images/button-2.png')" }}
-            >
-            Capture Photo
-            </button>
-        </div>
+            <div className="webcam-container">
+                <Webcam ref={webcamRef} className="webcam" screenshotFormat="image/png" />
+                <button
+                    className="capture-button"
+                    onClick={capturePhoto}
+                    style={{ backgroundImage: "url('/images/button-2.png')" }}
+                >
+                    Capture Photo
+                </button>
+            </div>
         )}
 
-    </div>
+        {capturedImage && (
+            <div className="webcam-container">
+                <img src={capturedImage} alt="Captured" className="webcam" />
+            </div>
+        )}
+
+
+    </div>z
     </>
   );
 }

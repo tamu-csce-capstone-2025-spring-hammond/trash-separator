@@ -21,7 +21,7 @@ const ResultsPage = () => {
             <h1>Results</h1>
             {image ? <img src={image} alt="Captured" className="captured-image" /> : <p>No image captured.</p>}
             <h2 className="result-text">{result ? `Prediction: ${result}` : "Processing..."}</h2>
-            <button className="back-button" onClick={() => navigate("/")}>
+            <button className="back-button" onClick={() => navigate("/homepage")}>
                 Back to Home
             </button>
             {!result && <img src="/assets/load.gif" alt="Processing..." className="loading-gif" />}
