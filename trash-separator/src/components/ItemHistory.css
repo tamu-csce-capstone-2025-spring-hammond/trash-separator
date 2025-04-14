@@ -1,21 +1,69 @@
+.history-list {
+  width: 100%;
+}
+
 .history-container {
     text-align: center;
+    font-family: 'ByteBounce', sans-serif;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   
   .back-button {
-    margin-top: 20px;
-    display: block;
-    background-color: #474747;
+    background-size: contain; 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: transparent;
     color: white;
+    padding: 10px 25px;
+    font-size: 18pt;
     border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 8px;
+    border-radius: 10px;
+    width: 200px; 
+    height: 100px;
     cursor: pointer;
   }
-  
+
   .back-button:hover {
-    background-color: #5b5b5b;
+    opacity: 0.8;
+    background-color: transparent; 
+  }
+  
+  .history-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'ByteBounce', sans-serif;
+    background-color: #ffffff;
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .history-info {
+    flex: 1;
+    font-size: 18pt;
+    text-align: left;
+  }
+  
+  .history-image {
+    margin-left: 20px;
+  }
+  
+  .history-thumbnail {
+    width: 100px;
+    height: auto;
+    border-radius: 10px;
+    border: 2px solid #2C6E49;
+  }
+  
+  .history-status-text {
+    font-size: 18pt;
+    font-family: 'ByteBounce', sans-serif;
   }
   

@@ -17,28 +17,34 @@ const ItemHistory = () => {
       {history.length === 0 ? (
         <p>No history yet.</p>
       ) : (
-        <ul>
-         {history.map((item, index) => (
-            <li key={index}>
-              <strong>{item.result}</strong> - 
-              <span style={{ color: item.status === "recyclable" ? "green" : item.status === "hazardous" ? "red" : item.status === "compost" ? "brown" : "gray" }}>
-                {" "}{item.status}
-              </span>
-              <br />
-              <img 
-                src={item.image} 
-                alt={`History ${index}`} 
-                style={{ width: "100px", height: "auto", marginTop: "5px" }} 
-              />
-              <br />
-              <small>{new Date(item.timestamp).toLocaleString()}</small>
-            </li>
-          ))}
+        <div className="history-list">
+          {history.map((item, index) => (
+            <div key={index} className="history-item-row mb-3 p-3 border rounded shadow-sm">
+              {/* Info */}
+              <div className="history-info">
+                <span className="result-text fw-bold">{item.result}</span> – 
+                <span className="history-status-text" style={{ color: item.status === "recyclable" ? "green" : item.status === "hazardous" ? "red" : item.status === "compost" ? "brown" : "gray" }}>
+                  {" "}{item.status}
+                </span>
+                <br />
+                <small className="history-status-text log-line">{new Date(item.timestamp).toLocaleString()}</small>
+              </div>
 
-        </ul>
+              {/* Image */}
+              <div className="history-image">
+                <img 
+                  src={item.image} 
+                  alt={`History ${index}`} 
+                  className="history-thumbnail"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
-      <button className="back-button" onClick={() => navigate('/homepage', { state: { fromWelcome: false } })}>
+
+      <button className="back-button" style={{ backgroundImage: "url('/images/button-2.png')" }} onClick={() => navigate('/homepage', { state: { fromWelcome: false } })}>
         Back to Home
       </button>
     </div>
