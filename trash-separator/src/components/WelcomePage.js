@@ -10,6 +10,7 @@ const WelcomePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+
   const handleNext = () => {
     if (step === 1) {
       setStep(2);
@@ -44,7 +45,8 @@ const WelcomePage = () => {
         setIsLoading(false)
         // Wait for the response before navigating to the homepage
         setTimeout(() => {
-            navigate('/homepage');
+          console.log("Navigating with state...");
+          navigate('/homepage', { state: { fromWelcome: true } });
         }, 0);
     } catch (error) {
         console.error('Error:', error);

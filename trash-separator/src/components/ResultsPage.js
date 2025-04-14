@@ -24,7 +24,19 @@ const ResultsPage = () => {
         if (status) setPredictionStatus(status);
     }, [prediction, non_ocr, scores, details, status]);
     
-
+    useEffect(() => {
+        if (result && image) {
+            const history = JSON.parse(sessionStorage.getItem("itemHistory") || "[]");
+            history.push({
+                result,
+                status: predictionStatus,
+                image: image, // 🔥 store base64 image here
+                timestamp: new Date().toISOString()
+            });
+            sessionStorage.setItem("itemHistory", JSON.stringify(history));
+        }
+    }, [result]);
+    
 
     return (
         <div className="results-container">
@@ -44,7 +56,7 @@ const ResultsPage = () => {
             <button
             style={{ backgroundImage: "url('/images/button-2.png')" }}
             className="btn-mt4"
-            onClick={() => navigate("/homepage")}
+            onClick={() =>  navigate('/homepage', { state: { fromWelcome: false } })}
             >
             Back to Home
             </button>

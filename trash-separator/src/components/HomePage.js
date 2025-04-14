@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom'
 import Webcam from 'react-webcam';
 import './HomePage.css';
 import heic2any from "heic2any";
@@ -7,12 +8,24 @@ import heic2any from "heic2any";
 const HomePage = () => {
     const [showWebcam, setShowWebcam] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [showIntroPopup, setShowIntroPopup] = useState(true);
+    const [showIntroPopup, setShowIntroPopup] = useState(false);
     const [capturedImage, setCapturedImage] = useState(null);
 
     const webcamRef = useRef(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
+    useEffect(() => {
+        const cameFromWelcome = location.state?.fromWelcome === true;
+    
+        if (cameFromWelcome) {
+            console.log("User came from welcome page");
+            setShowIntroPopup(true);
+        } else {
+            console.log("User did NOT come from welcome page");
+            setShowIntroPopup(false);
+        }
+    }, [location.state]);
     
     // Using captured picture using webcam
     const capturePhoto = async () => {
