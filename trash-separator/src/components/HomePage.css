@@ -147,6 +147,7 @@
   }
   
   .intro-text {
+    font-family: 'ByteBounce', sans-serif;
     font-size: 1.5rem;
     margin-bottom: 20px;
   }
@@ -163,7 +164,7 @@
     border: none;
     border-radius: 10px;
     width: 200px; 
-  height: 100px;
+    height: 100px;
     cursor: pointer;
   }
   
@@ -211,7 +212,7 @@
       border: none;
       border-radius: 10px;
       width: 200px; 
-    height: 100px;
+     height: 100px;
       cursor: pointer;
     }
     

@@ -7,6 +7,7 @@ const WelcomePage = () => {
   const [zipCode, setZipCode] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleNext = () => {
@@ -18,23 +19,56 @@ const WelcomePage = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log('Zip code submitted:', zipCode);
     console.log('Navigating to homepage...');
+    setIsLoading(true); 
     setShowPopup(false);
-
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      navigate('/homepage');
-    }, 0);
-  };
+    try {
+        // Send the zipcode to the Flask backend
+        const response = await fetch('http://127.0.0.1:5001/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ zipcode: zipCode }),  // Sending the zipcode in the body
+        });
 
+        if (!response.ok) {
+            throw new Error('Error submitting zipcode');
+        }
+        const result = await response.json();
+        console.log('API result:', result);
+        setIsLoading(false)
+        // Wait for the response before navigating to the homepage
+        setTimeout(() => {
+            navigate('/homepage');
+        }, 0);
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        setIsSubmitting(false);
+    }
+};
   
   
 
   return (
     <div className="app" style={{ fontFamily: 'ByteBounce, sans-serif' }}>
+      {isLoading && (
+        <div className="loading-overlay">
+            <div className="loading-content">
+            <img 
+            src="/assets/loading.gif" 
+            alt="Loading..." 
+            style={{ width: '100px', height: 'auto', marginBottom: '10px' }}
+            />
+            <p>Retrieving data...</p>
+            </div>
+        </div>
+        )}
       <main className="main-content" >
       <div className="robot-container column-layout">
       {step !== 3 && (

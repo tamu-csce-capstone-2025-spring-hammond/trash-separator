@@ -1,4 +1,6 @@
 .results-container {
+    font-family: 'ByteBounce', sans-serif;
+    font-size: 18pt;
     text-align: center;
     padding: 20px;
     display: flex;
@@ -103,12 +105,40 @@
 .caret-icon.rotate {
   transform: rotate(180deg);
 }
-
+.accordion-button,
 .accordion-button:not(.collapsed) {
-  background-color: #f1f1f1 !important; /* Light gray */
-  color: #000; /* Optional: dark text */
-  box-shadow: none; /* Optional: remove blue border/shadow */
+  font-size: 18pt !important;
+  background-color: #f1f1f1 !important;
+  box-shadow: none !important;
+}
+.result-text{
+  font-size: 18pt;
 }
 
+.results-header{
+  font-size: 25pt;
+}
+.mt-2,.mb-3, .ocr-header{
+  font-size: 20pt;
+}
 
-  
+.btn-mt4{
+    font-family: 'ByteBounce', sans-serif;
+    background-size: contain; 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    color: white;
+    padding: 10px 25px;
+    font-size: 18pt;
+    border: none;
+    border-radius: 10px;
+    width: 200px; 
+    height: 100px;
+    cursor: pointer;
+}
+
+.btn-mt4:hover {
+  opacity: 0.8;
+  background-color: transparent; 
+}
