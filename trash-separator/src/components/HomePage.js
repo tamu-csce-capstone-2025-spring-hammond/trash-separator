@@ -153,7 +153,12 @@ const handleUpload = async (event) => {
             />
             <ol className="intro-text">
                 <li>Make sure to scan items one at a time</li>
-                <li>Try for good lighting and a clear background</li>
+                <li>For best results, try:</li>
+                <ul>
+                    <li>Good lighting</li>
+                    <li>Uniform background</li>
+                    <li>Visible, horizontal text</li>
+                </ul>
             </ol>
 
             <button 
@@ -174,7 +179,7 @@ const handleUpload = async (event) => {
             <img 
             src="/assets/loading.gif" 
             alt="Loading..." 
-            style={{ width: '100px', height: 'auto', marginBottom: '10px' }}
+            style={{ width: '100px', height: 'auto', marginBottom: '10px', fontfamily: 'ByteBounce sans-serif'}}
             />
             <p>Analyzing image...</p>
             </div>

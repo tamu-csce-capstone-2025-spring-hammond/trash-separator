@@ -1,8 +1,5 @@
-.app {
-  font-family: 'ByteBounce', sans-serif;
-}
-
 .loading-overlay {
+  font-family: 'ByteBounce', sans-serif;
   position: fixed;
   top: 0;
   left: 0;
