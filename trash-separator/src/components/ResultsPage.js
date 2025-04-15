@@ -35,7 +35,7 @@ const ResultsPage = () => {
             });
             sessionStorage.setItem("itemHistory", JSON.stringify(history));
         }
-    }, [result]);
+    }, [result, image, predictionStatus]);
     
 
     return (
@@ -51,7 +51,7 @@ const ResultsPage = () => {
                 </h2>
             )}
 
-            <h4 className="result-text">{result ? `Prediction: ${result}` : "Processing..."}</h4>
+            <h4 className="result-text">{result ? `Prediction: ${result}` : "Trash"}</h4>
 
             <button
             style={{ backgroundImage: "url('/images/button-2.png')" }}
@@ -61,9 +61,8 @@ const ResultsPage = () => {
             Back to Home
             </button>
 
-            {!result && <img src="/assets/load.gif" alt="Processing..." className="loading-gif" />}
+            {!result && <p>Cannot accurately classify object</p>}
 
-            {result && (
                 <div className="accordion w-100 mt-4" id="predictionDetailsAccordion">
                     <div className="accordion-item">
                         <h2 className="accordion-header" id="headingOne">
@@ -115,7 +114,6 @@ const ResultsPage = () => {
                         </div>
                     </div>
                 </div>
-            )}
         </div>
     );
 };
