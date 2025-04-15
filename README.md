@@ -1,58 +1,56 @@
 # Waste Classification Web App
 
-This project is a React-based web application that allows users to:
-- **Scan a waste item using a webcam** or **Upload a waste image** for classification
-- **View the waste classification history of uploaded items**
+This project is a **React-based web application** that allows users to:
+- **Scan a waste item using a webcam** or **Upload a waste image** for classification  
+- **View the waste classification history** of uploaded items  
+- **Adhere to recycling guidelines for their ZIP code** using real-time data from the **Earth911 API** (https://earth911.com/)
 
-Once an image is captured or uploaded, it redirects to the **Results Page**. Users can also navigate to the **Item History Page** to view past classifications.
+Once an image is captured or uploaded, it redirects to the **Results Page**, where users can see classification results powered. Users can also navigate to the **Item History Page** to view past classifications.
 
-## Features
+---
 
-- **Scan Using Camera**: Opens the webcam to capture an image.
-- **Upload Image**: Allows users to upload an image from their device.
-- **Item History**: Navigates to a page that will display historical classification data.
-- **Results Page**: Displays the captured or uploaded image.
+## How It Works
+
+After an image is uploaded or captured:
+1. The image is sent to a **Flask backend**.
+2. The backend uses a combination of:
+   - **Vision Transformer (ViT)** for object classification
+   - **DocTR OCR** to extract any readable text from the image
+3. Based on the prediction and OCR results, the item is classified into one of the following categories:
+   - **Recyclable**
+   - **Hazardous**
+   - **Compost**
+   - **Trash**
+4. A user-entered zipcode is sent to the **Earth911 API**, which returns region-specific information on recycling policies.
+5. The frontend then displays the classification results and status using color-coded labels and prediction detail logs.
+
+---
 
 ## Tech Stack
-- **React**: A JavaScript library for building user interfaces.
-- **React Router**: For routing between pages in the app.
-- **react-webcam**: For accessing the webcam to capture images.
-- **CSS**: For styling the app.
 
-## Installation
+- **Frontend**:
+  - React  
+  - React Router  
+  - react-webcam  
+  - CSS 
 
-To get started, clone this repository and install the dependencies.
+- **Backend**:
+  - Flask (Python)  
+  - Vision Transformer (ViT)  
+  - Doctr (OCR)  
+  - Earth911 API (for recycling info)  
 
-1. **Clone the repository** to your local machine:
-    ```bash
-    git clone https://github.com/your-username/react-image-scanner.git
-    ```
-
-2. **Navigate to the project folder**:
-    ```bash
-    cd react-image-scanner
-    ```
-
-3. **Install dependencies**:
-    ```bash
-    npm install
-    ```
-
-4. **Start the development server**:
-    ```bash
-    npm start
-    ```
+---
 
 ## Usage
-
-1. **Home Page**:
-    - Click the **"Scan Using Camera"** button to open the webcam and capture an image.
-    - Click the **"Upload Image"** button to select and upload an image from your device.
-    - Click **"Item History"** to go to the classification history page.
-
-2. **Results Page**:
-    - The captured or uploaded image will be displayed on the results page.
-    - A **"Back to Home"** button is available to navigate back to the homepage.
-
-3. **Item History Page**:
-    - Displays a placeholder message. This will be updated in the future to show a history of uploaded/captured images with classifications.
+1. Home Page:
+   - Click "Scan Using Camera" to open the webcam and capture an image.
+   - Click "Upload Image" to upload a photo of a waste item.
+   - Click "Item History" to view your classification history.
+2. Results Page:
+   - View the captured or uploaded image.
+   - See the classification and recycling status.
+   - Optional: View prediction details (e.g., ViT class, OCR output, backend status).
+   - Click "Back to Home" to return to home page.
+3. Item History Page:
+   - View a list of previously classified items (during the session).
