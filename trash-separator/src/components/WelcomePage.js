@@ -29,7 +29,7 @@ const WelcomePage = () => {
 
     try {
         // Send the zipcode to the Flask backend
-        const response = await fetch('http://127.0.0.1:5001/api', {
+        const response = await fetch('https://trashseparator.xyz/api', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
