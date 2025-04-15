@@ -16,6 +16,15 @@ from dotenv import load_dotenv
 import zip_codes
 import Levenshtein
 
+# Flask app
+app = Flask(__name__)
+# CORS(app)
+CORS(app, origins=[
+    "https://main.d1yehgy0hyfcp0.amplifyapp.com",
+    "https://trashseparator.xyz",
+    "http://localhost:3000"
+])
+
 load_dotenv()
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -29,6 +38,7 @@ def get_api_output(user_zipcode):
 
     # latitude & longitude for postal code
     postal_data = zip_codes.get_postal_data(country_code, postal_code)
+    print(postal_data)
 
     latitude = postal_data.get('latitude')
     longitude = postal_data.get('longitude')
@@ -61,12 +71,9 @@ def get_api_output(user_zipcode):
     else:
         print("No residential recycling programs found.")
 
-DEFAULT_ZIP = '77407'
-recyclable_classes = get_api_output(DEFAULT_ZIP) or set()
+# DEFAULT_ZIP = '77407'
+# recyclable_classes = get_api_output(DEFAULT_ZIP) or set()
 
-# Flask app
-app = Flask(__name__)
-CORS(app)
 
 # --- Load ViT Model ---
 MODEL_PATH = "../vit_model.pth"
@@ -82,7 +89,7 @@ model_vit = models.vit_b_16()
 model_vit.heads[0] = torch.nn.Linear(model_vit.heads[0].in_features, len(class_names_vit))
 model_vit.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model_vit.to(device)
-model_vit.eval()
+model_vit.eval() 
 
 def are_strings_similar(s1, s2, threshold=0.7):
     """
@@ -215,28 +222,51 @@ def vit_with_ocr(image_path):
         logs.append("No OCR")
     return scores, class_name, logs, before_ocr
 
+# 
+
+@app.route("/api", methods=["POST"])
+def api():
+    global recyclable_classes
+    # Extract zipcode from the JSON request body
+    data = request.get_json()
+    zipcode = data.get('zipcode')  # Assumes the key is 'zipcode'
+    
+    if not zipcode:
+        return jsonify({"error": "Zipcode is required"}), 400
+
+    # Call your logic here to get the API output using the zipcode
+    recyclable_classes = get_api_output(zipcode)  # Assuming you have this function defined
+
+    # Respond with the result
+    return jsonify({"message" : 'classes received'})
+
 # --- Flask Endpoint ---
 @app.route("/predict", methods=["POST"])
 def predict():
+    print("Received image POST request")
+
     if "image" not in request.files:
+        print("No image in request.files")
         return jsonify({"error": "No image uploaded"}), 400
 
     image = request.files["image"]
+    print(f"Image received: {image.filename}")
 
     try:
         img = Image.open(image).convert("RGBA")
-        img = remove(img)  # remove background
+        img = remove(img)
         img = img.convert("RGB")
 
-        # Save image to a temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
             temp_path = temp_file.name
             img.save(temp_path)
 
-        # Run model + OCR
+        print(f"Temp file saved at {temp_path}")
+
         scores, class_name, logs, before_ocr = vit_with_ocr(temp_path)
+        print(f"Model returned: {class_name}, scores: {scores}")
+
         os.remove(temp_path)
-        
 
         if class_name in ["battery", "syringe"]:
             status = "hazardous"
@@ -247,6 +277,8 @@ def predict():
         else:
             status = "trash"
 
+        print(f"Final status: {status}")
+
         return jsonify({
             "prediction": class_name,
             "non_ocr": before_ocr,
@@ -256,7 +288,11 @@ def predict():
         })
 
     except Exception as e:
+        print("Error in predict route:", e)  # 👈 this will show in the terminal
         return jsonify({"error": f"Failed to process image: {str(e)}"}), 500
 
 if __name__ == "__main__":
+    print("Starting Flask server...")
     app.run(host="0.0.0.0", port=5000)
+# def handler(request):
+#     return app(request)

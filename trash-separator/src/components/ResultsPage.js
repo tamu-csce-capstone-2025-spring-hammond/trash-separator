@@ -24,11 +24,23 @@ const ResultsPage = () => {
         if (status) setPredictionStatus(status);
     }, [prediction, non_ocr, scores, details, status]);
     
-
+    useEffect(() => {
+        if (result && image) {
+            const history = JSON.parse(sessionStorage.getItem("itemHistory") || "[]");
+            history.push({
+                result,
+                status: predictionStatus,
+                image: image, // 🔥 store base64 image here
+                timestamp: new Date().toISOString()
+            });
+            sessionStorage.setItem("itemHistory", JSON.stringify(history));
+        }
+    }, [result, image, predictionStatus]);
+    
 
     return (
         <div className="results-container">
-            <h1>Results</h1>
+            <h1 className='results-header'>Results</h1>
             {image ? <img src={image} alt="Captured" className="captured-image" /> : <p>No image captured.</p>}
 
             {result && (
@@ -39,19 +51,18 @@ const ResultsPage = () => {
                 </h2>
             )}
 
-            <h4 className="result-text">{result ? `Prediction: ${result}` : "Processing..."}</h4>
+            <h4 className="result-text">{result ? `Prediction: ${result}` : "Trash"}</h4>
 
             <button
-            style={{ backgroundColor: '#1B4965', color: 'white', border: 'none' }}
-            className="btn mt-4"
-            onClick={() => navigate("/")}
+            style={{ backgroundImage: "url('/images/button-2.png')" }}
+            className="btn-mt4"
+            onClick={() =>  navigate('/homepage', { state: { fromWelcome: false } })}
             >
             Back to Home
             </button>
 
-            {!result && <img src="/assets/load.gif" alt="Processing..." className="loading-gif" />}
+            {!result && <p>Cannot accurately classify object</p>}
 
-            {result && (
                 <div className="accordion w-100 mt-4" id="predictionDetailsAccordion">
                     <div className="accordion-item">
                         <h2 className="accordion-header" id="headingOne">
@@ -84,7 +95,7 @@ const ResultsPage = () => {
                                 </div>
 
                                 {/* OCR Logs */}
-                                <h5>Optical Character Recognition (OCR)</h5>
+                                <h5 className='ocr-header'>Optical Character Recognition (OCR)</h5>
                                 <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.9em' }}>
                                     {logs.join('\n')}
                                 </pre>
@@ -103,7 +114,6 @@ const ResultsPage = () => {
                         </div>
                     </div>
                 </div>
-            )}
         </div>
     );
 };
