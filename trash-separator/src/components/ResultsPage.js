@@ -51,7 +51,7 @@ const ResultsPage = () => {
                 </h2>
             )}
 
-            <h4 className="result-text">{result ? `Prediction: ${result}` : "Trash"}</h4>
+            <h4 className="result-text">{result ? `Prediction: ${result}` : "Inconclusive"}</h4>
 
             <button
             style={{ backgroundImage: "url('/images/button-2.png')" }}
