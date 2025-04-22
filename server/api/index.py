@@ -220,7 +220,11 @@ def vit_with_ocr(image_path):
         class_name = max(scores, key=scores.get)
     else:
         logs.append("No OCR")
-    return scores, class_name, logs, before_ocr
+    
+    if scores[class_name] < 0.5:
+        return {}, "inconclusive", [], {}
+    else:
+        return scores, class_name, logs, before_ocr
 
 # 
 
