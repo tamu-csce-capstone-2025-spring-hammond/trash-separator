@@ -23,7 +23,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def get_api_output(user_zipcode):
     print("API triggered")
     output = set()
-    # CHANGE THIS
     postal_code = user_zipcode
     country_code = "US"
 
